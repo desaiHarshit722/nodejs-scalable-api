@@ -1,11 +1,10 @@
-import express, { Router } from "express";
+import express, { json, urlencoded } from "express";
 import router from "./routes/products";
 const app = express();
 const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use(urlencoded({extended:false}))
+app.use(json())
 
 app.use('/products', router)
 

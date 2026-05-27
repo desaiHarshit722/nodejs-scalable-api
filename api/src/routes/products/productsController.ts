@@ -9,6 +9,7 @@ export function getProductsById(req: Request, res: Response) {
 }
 
 export function createProducts(req: Request, res: Response) {
+  console.log(req.body);
   res.send("create the products");
 }
 
