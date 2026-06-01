@@ -6,5 +6,6 @@ export const ProductsTable = pgTable("products", {
   name: varchar({ length: 255 }).notNull(),
   description: text(),
   image:varchar({length:255}),
-  price:doublePrecision().notNull()
+  price:doublePrecision().notNull(),
+  quantity:integer().default(0)
 });

@@ -1,22 +1,94 @@
 import { Request, Response } from "express";
+import { db } from "../../db";
+import { ProductsTable } from "../../db/productsSchema";
+import { eq } from "drizzle-orm";
 
-export function listProducts(req: Request, res: Response) {
-  res.send("this is the products list");
+export async function listProducts(req: Request, res: Response) {
+  try {
+    const products = await db.select().from(ProductsTable);
+
+    res.status(200).json(products);
+  } catch (e) {
+    res.status(500).send(e);
+  }
 }
 
-export function getProductsById(req: Request, res: Response) {
-  res.send("get the products by id");
+export async function getProductsById(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const [product] = await db
+      .select()
+      .from(ProductsTable)
+      .where(eq(ProductsTable.id, Number(id)));
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json(product);
+  } catch (e) {
+    res.status(500).send(e);
+  }
 }
 
-export function createProducts(req: Request, res: Response) {
-  console.log(req.body);
-  res.send("create the products");
+export async function createProducts(req: Request, res: Response) {
+  try {
+    const [product] = await db
+      .insert(ProductsTable)
+      .values(req.body)
+      .returning();
+
+    res.status(201).json(product);
+  } catch (e) {
+    res.status(500).send(e);
+  }
 }
 
-export function updateProducts(req: Request, res: Response) {
-  res.send("update the products");
+export async function updateProducts(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const [updatedProduct] = await db
+      .update(ProductsTable)
+      .set(req.body)
+      .where(eq(ProductsTable.id, Number(id)))
+      .returning();
+
+    if (!updatedProduct) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json(updatedProduct);
+  } catch (e) {
+    res.status(500).send(e);
+  }
 }
 
-export function deleteProducts(req: Request, res: Response) {
-  res.send("delete the products");
+export async function deleteProducts(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const [deletedProduct] = await db
+      .delete(ProductsTable)
+      .where(eq(ProductsTable.id, Number(id)))
+      .returning();
+
+    if (!deletedProduct) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Product deleted successfully",
+      product: deletedProduct,
+    });
+  } catch (e) {
+    res.status(500).send(e);
+  }
 }
